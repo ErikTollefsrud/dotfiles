@@ -65,7 +65,7 @@ mans () {
 #  -------------------------------
 
 zipf () { zip -r "$1".zip "$1" ; }       # zipf:       To create a ZIP archive of a folder
-alias numFiles="echo $(ls -1 | wc -l)'   # numFiles:   Count of non-hidden files in current dir
+alias numFiles="echo $(ls -1 | wc -l)"   # numFiles:   Count of non-hidden files in current dir
 
 #  extract:  Extract most known archives with one command
 #  -----------------------------------------------------------------
@@ -100,7 +100,7 @@ ff () { /usr/bin/find . -name "$@" ; }        # ff:       Find file under the cu
 ffs () { /usr/bin/find . -name "$@"'*' ; }    # ffs:      Find file whose name starts with a given string
 ffe () { /usr/bin/find . -name '*'"$@" ; }    # ffe:      Find file whose name ends with a given string
 
-#  spotlight: Search for a file using macOS Spotlight's metadata
+#  spotlight: Search for a file using macOS Spotlights metadata
 #  -----------------------------------------------------------------
 spotlight () { mdfind "kMDItemDisplayName == '$@'wc" ; }
 
