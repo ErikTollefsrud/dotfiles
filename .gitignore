@@ -1,6 +1,7 @@
 # Vim Files & Folders #
 #######################
 vim/.vim/plugged/*
+vim/.vim/.netrwhist
 
 # OS Generated Files #
 ######################
