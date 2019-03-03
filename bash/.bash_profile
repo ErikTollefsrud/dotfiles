@@ -12,8 +12,9 @@
 #  5.  Process Management
 #  6.  Networking
 #  7.  System Operations & Information
-#  8.  Reminders & Notes
-#
+#  8.  Application Specific Items 
+#  9.  Reminders & Notes
+#    
 #  ----------------------------------------------------------------------------
 
 #  -------------------------------
@@ -159,6 +160,17 @@ alias showBlocked='sudo ipfw list'                      #  showBlocked: All ipfw
 #  finderHideHidden:  Hide hidden files in Finder
 alias finderShowHidden='defaults write com.apple.finder ShowAllFiles TRUE'
 alias finderHideHidden='defaults write com.apple.finder ShowAllFiles FALSE'
+
+
+#  -------------------------------------
+#  8. Application Specific Itesm 
+#  -------------------------------------
+
+#  Requirements: youtube-dl
+#  Downloads lynda.com course. First arg should be URL of course you want to download.
+#  Run the command inside the folder were cookies.txt resides.
+lynda-dl() { youtube-dl --cookies cookies.txt "$1" -o "Lynda.com - %(playlist)s/%(chapter_number)s - %(chapter)s/%(playlist_index)s - %(title)s.%(ext)s" --write-sub ; } 
+
 
 #   ---------------------------------------
 #   9. REMINDERS & NOTES
