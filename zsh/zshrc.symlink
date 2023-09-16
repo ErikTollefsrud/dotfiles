@@ -1,0 +1,157 @@
+export ZSH=$DOTFILES/zsh
+
+if [[ -d $DOTFILES/zsh/functions ]]; then
+  for func in $DOTFILES/zsh/functions/*(:t); autoload -U $func
+fi
+
+##############################
+# Configuration
+##############################
+
+# A fairly complete list of zsh options (setopt / unsetopt) can be found here https://www.csse.uwa.edu.au/programming/linux/zsh-doc/zsh_17.html
+
+# initialize autocomplete
+autoload -U compinit add-zsh-hook
+compinit
+
+# PATH configuration
+prepend_path /usr/local/opt/grep/libexec/gnubin
+prepend_path /usr/local/sbin
+prepend_path $DOTFILES/bin
+prepend_path $HOME/bin
+prepend_path $HOME/.config/emacs/bin
+
+# define the code directory
+# This is where my code exists and where I want the `c` autocomplete to work from exclusively
+if [[ -d ~/code ]]; then
+  export CODE_DIR=~/code
+elif [[ -d ~/Developer ]]; then
+  export CODE_DIR=~/Developer/Bleachr
+fi
+
+# display how long all tasks over 10 second take
+export REPORTTIME=10
+export KEYTIMEOUT=1             # 10ms delay for key sequences
+
+setopt NO_BG_NICE               # turns off setting background jobs at lower priority ('higher nice value' in UNIX-speak)
+setopt NO_HUP                   # don't kill background jobs when the shell exits
+setopt NO_LIST_BEEP             # beeping is only turned off for ambiguous completions
+setopt LOCAL_OPTIONS            
+setopt LOCAL_TRAPS
+setopt PROMPT_SUBST             # parameter expansion, command substitution and arithmetic expansion are performed in prompts.
+
+# history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY       # write the history file in the ":start:elapsed;command" format.
+setopt HIST_REDUCE_BLANKS     # remove superfluous blanks before recording entry.
+setopt SHARE_HISTORY          # share history between all sessions.
+setopt HIST_IGNORE_ALL_DUPS   # delete old recorded entry if new entry is a duplicate.
+
+setopt COMPLETE_ALIASES       # Prevents aliases on the command line from being internally substituted before completion is attempted. The effect is to make the alias a distinct command for completion purposes.
+
+# matches case insensitive for lowercase
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+# pasting with tabs doesn't perform completion
+zstyle ':completion:*' insert-tab pending
+
+# default to file completion
+zstyle ':completion:*' completer _expand _complete _files _correct _approximate
+
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:description' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*' group-name ''
+
+#########################################
+# Plugin setup
+#########################################
+
+export ZPLUGDIR="$CACHEDIR/zsh/plugins"
+[[ -d "$ZPLUGDIR" ]] || mkdir -p "$ZPLUGDIR"
+# array containing plugin information (managed by zfetch)
+typeset -A plugins
+
+zfetch mafredri/zsh-async async.plugin.zsh
+zfetch zsh-users/zsh-syntax-highlighting
+zfetch zsh-users/zsh-autosuggestions
+zfetch grigorii-zander/zsh-npm-scripts-autocomplete
+zfetch Aloxaf/fzf-tab
+zfetch squarefrog/xcode
+
+# fnm is a fast and simple Node.js version manager
+if [[ -x "$(command -v fnm)" ]]; then
+  eval "$(fnm env --use-on-cd)"
+fi
+
+[[ -e ~/.terminfo ]] && export TERMINFO_DIRS=~/.terminfo:/usr/share/terminfo
+
+#########################################
+# Setup
+#########################################
+
+if [ -f $HOME/.fzf.zsh ]; then
+  source $HOME/.fzf.zsh
+  export FZF_DEFAULT_COMMAND='fd --type f'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_DEFAULT_OPTS="--color bg:-1,bg+:-1,fg:-1,fg+:#feffff,hl:#993f84,hl+:#d256b5,info:#676767,prompt:#676767,pointer:#676767"
+fi
+
+# Change cursor shape for different vi modes
+function zle-keymap-select {
+  if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
+    echo -ne '\e[1 q'
+  elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] || [[ ${KEYMAP} == '' ]] || [[ $(1) = 'beam' ]]; then
+    echo -ne '\e[5 q'
+  fi    
+}
+zle -N zle-keymap-select
+zle-line-init() {
+  zle -K viins # initiate 'vi insert' as keymap (can be removed if 'bindkey -V' has been set elsewhere)
+  echo -ne '\e[5 q' # Use beam shape cursor on startup.
+  preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt
+}
+
+# add color to man pages
+export MANROFFOPT='-c'
+export LESS_TERMCAP_mb=$(tput bold; tput setaf 2)
+export LESS_TERMCAP_md=$(tput bold; tput setaf 6)
+export LESS_TERMCAP_me=$(tput sgr0)
+export LESS_TERMCAP_so=$(tput bold; tput setaf 3; tput setab 4)
+export LESS_TERMCAP_se=$(tput rmso; tput sgr0)
+export LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 7)
+export LESS_TERMCAP_ue=$(tput rmul; tput sgr0)
+export LESS_TERMCAP_mr=$(tput rev)
+export LESS_TERMCAP_mh=$(tput dim)
+
+# prefer zoxide over z.sh
+if [[ -x "$(command -v zoxide)" ]]; then
+    eval "$(zoxide init zsh --hook pwd)"
+else
+  # source z.sh if it exists
+  zpath="$(brew --prefix)/etc/profile.d/z.sh"
+  if [ -f "$zpath" ]; then
+      source "$zpath"
+  fi
+fi
+
+# Detect which `ls` flavor is in use
+if ls --color > /dev/null 2>&1; then # GNU `ls`
+    colorflag="--color"
+else # macOS `ls`
+    colorflag="-G"
+fi
+
+# look for all .zsh files and source them
+config_files=($DOTFILES/**/*.zsh)
+for file in $config_files[@]; do
+  source "$file"
+done
+
+# If a ~/.zshrc.local exists, source it
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+# If a ~/.localrc zshrc exists, source it
+[[ -a ~/.localrc ]] && source ~/.localrc
