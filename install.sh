@@ -148,7 +148,27 @@ setup_homebrew() {
     "$(brew --prefix)"/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
 }
 
-fetch_catppuccin_theme() {
+setup_doom(){
+    title "Installing Doom Emacs"
+
+    if ! emacs_loc="$(type -p "emacs")" || [[ -z $emacs_loc ]]; then
+        info "Emacs not installed. Setup Homebrew first."
+
+       return
+    fi
+
+    info "Installing DOOM emacs"
+    git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+    ~/.config/emacs/bin/doom install
+
+    info "Adding ~/.config/emacs/bin to PATH"
+    export PATH=$PATH:~/.config/emacs/bin
+
+    info "Running doom sync"
+    doom sync
+}
+
+fetch_kitty_themes() {
     for palette in frappe latte macchiato mocha; do
         curl -o "$DOTFILES/config/kitty/themes/catppuccin-$palette.conf" "https://raw.githubusercontent.com/catppuccin/kitty/main/$palette.conf"
     done
@@ -229,10 +249,13 @@ case "$1" in
   terminfo)
     setup_terminfo
     ;;
+  doom)
+    setup_doom
+    ;;
   macos)
     setup_macos
     ;;
-  catppuccin)
+  kittyThemes)
     fetch_catppuccin_theme
     ;;
   all)
@@ -241,10 +264,11 @@ case "$1" in
     setup_homebrew
     setup_shell
     setup_git
+    setup_doom
     setup_macos
     ;;
   *)
-    echo -e $"\nUsage: $(basename "$0") {backup|link|git|homebrew|shell|terminfo|macos|all}\n"
+    echo -e $"\nUsage: $(basename "$0") {backup|link|git|homebrew|shell|terminfo|doom|macos|all}\n"
     exit 1
     ;;
 esac
