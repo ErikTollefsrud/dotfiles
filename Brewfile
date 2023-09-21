@@ -13,7 +13,7 @@ if OS.mac?
   # Applications
   cask "kitty" # a better terminal emulator
   cask "1password/tap/1password-cli"
-  brew "emacs-plus --with-native-comp --with-imagemagick --with-modern-doom3-icon" # emacs for mac
+  brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-imagemagick", "with-modern-doom3-icon", "with-native-comp"]
 
 elsif OS.linux?
   brew "xclip" # access to clipboard (similar to pbcopy/pbpaste)
