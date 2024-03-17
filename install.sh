@@ -251,7 +251,7 @@ case "$1" in
   git)
     setup_git
     ;;
-  homebrew)
+  apps)
     setup_homebrew
     ;;
   shell)
@@ -272,7 +272,7 @@ case "$1" in
   all)
     setup_symlinks
     setup_terminfo
-    setup_homebrew
+    install_apps
     setup_shell
     setup_git
     setup_macos
