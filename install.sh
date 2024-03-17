@@ -252,7 +252,7 @@ case "$1" in
     setup_git
     ;;
   apps)
-    setup_homebrew
+    install_apps
     ;;
   shell)
     setup_shell
@@ -278,7 +278,7 @@ case "$1" in
     setup_macos
     ;;
   *)
-    echo -e $"\nUsage: $(basename "$0") {backup|link|git|homebrew|shell|terminfo|doom|macos|all}\n"
+    echo -e $"\nUsage: $(basename "$0") {backup|link|git|apps|shell|terminfo|doom|macos|all}\n"
     exit 1
     ;;
 esac
