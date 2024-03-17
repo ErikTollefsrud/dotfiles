@@ -11,6 +11,8 @@ COLOR_PURPLE="\033[1;35m"
 COLOR_YELLOW="\033[1;33m"
 COLOR_NONE="\033[0m"
 
+PLATFORM="$(uname)"
+
 title() {
     echo -e "\n${COLOR_PURPLE}$1${COLOR_NONE}"
     echo -e "${COLOR_GRAY}==============================${COLOR_NONE}\n"
@@ -64,36 +66,15 @@ backup() {
     done
 }
 
-
 setup_symlinks() {
     title "Creating symlinks"
+	
+    stowFolders=$(find "$DOTFILES/stow" -mindepth 1 -maxdepth 1 -type d)
 
-    for file in $(get_linkables) ; do
-        target="$HOME/.$(basename "$file" '.symlink')"
-        if [ -e "$target" ]; then
-            info "~${target#$HOME} already exists... Skipping."
-        else
-            info "Creating symlink for $file"
-            ln -s "$file" "$target"
-        fi
-    done
-
-    echo -e
-    info "installing to ~/.config"
-    if [ ! -d "$HOME/.config" ]; then
-        info "Creating ~/.config"
-        mkdir -p "$HOME/.config"
-    fi
-
-    config_files=$(find "$DOTFILES/config" -maxdepth 1 2>/dev/null)
-    for config in $config_files; do
-        target="$HOME/.config/$(basename "$config")"
-        if [ -e "$target" ]; then
-            info "~${target#$HOME} already exists... Skipping."
-        else
-            info "Creating symlink for $config"
-            ln -s "$config" "$target"
-        fi
+    for file in $stowFolders ; do
+	    info "Creating symlink for $file"
+	    fileName="$(basename "$file")"
+	    stow --dir=$DOTFILES/stow --target=$HOME $fileName
     done
 }
 
@@ -124,8 +105,8 @@ setup_git() {
     fi
 }
 
-setup_homebrew() {
-    title "Setting up Homebrew"
+install_brew_apps() {
+    info "Installing applications in Brewfile"
 
     if test ! "$(command -v brew)"; then
         info "Homebrew not installed. Installing."
@@ -148,11 +129,41 @@ setup_homebrew() {
     "$(brew --prefix)"/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
 }
 
+# For now let's only support distros with apt-get
+install_apt_apps() {
+    info "Installing application in LinuxApps"
+
+    # check that apt is installed, and exit function if we can't find it.
+    if test ! "$(command -v apt)"; then
+        warming "Thought we were on Linux but can't find apt binary"
+        return 1
+    fi 
+
+    # update & upgrade packages
+    apt update && apt upgrade
+
+    # loop over LinuxApps file and install each item
+    while read -r line;
+    do
+        sudo apt -y install "$line";
+    done < $DOTFILES/LinuxApps
+}
+
+install_apps() {
+    title "Installing Applications"
+
+    if [ "$(uname)" == "Darwin" ]; then
+        install_brew_apps
+    else
+        install_apt_apps
+    fi
+}
+
 setup_doom(){
     title "Installing Doom Emacs"
 
     if ! emacs_loc="$(type -p "emacs")" || [[ -z $emacs_loc ]]; then
-        info "Emacs not installed. Setup Homebrew first."
+        info "Emacs not installed. Install emacs first, then run ./install.sh doom"
 
        return
     fi
@@ -182,7 +193,7 @@ setup_shell() {
         info "adding $zsh_path to /etc/shells"
         echo "$zsh_path" | sudo tee -a /etc/shells
     fi
-
+ 
     if [[ "$SHELL" != "$zsh_path" ]]; then
         chsh -s "$zsh_path"
         info "default shell changed to $zsh_path"
