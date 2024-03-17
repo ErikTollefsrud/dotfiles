@@ -275,7 +275,6 @@ case "$1" in
     setup_homebrew
     setup_shell
     setup_git
-    setup_doom
     setup_macos
     ;;
   *)
