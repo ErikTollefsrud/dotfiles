@@ -5,21 +5,17 @@ if OS.mac?
   tap "homebrew/cask"
   tap "homebrew/cask-fonts"
   tap "koekeishiya/formulae"
-  tap "d12frosted/emacs-plus"
 
   brew "noti" # utility to display notifications from scripts
   brew "trash" # rm, but put in the trash rather than completely delete
 
   # Applications
-  cask "kitty" # a better terminal emulator
+  cask "ghostty" # a better terminal emulator
   cask "1password/tap/1password-cli"
-  brew "d12frosted/emacs-plus/emacs-plus@29", args: ["with-imagemagick", "with-modern-doom3-icon", "with-native-comp"]
 
 elsif OS.linux?
   brew "xclip" # access to clipboard (similar to pbcopy/pbpaste)
-  cask "kitty"
-
-  brew "emacs"
+  cask "ghostty"
 end
 
 # Fonts
