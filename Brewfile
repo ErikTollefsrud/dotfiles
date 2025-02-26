@@ -29,6 +29,7 @@ tap "homebrew/bundle"
 tap "homebrew/core"
 
 # packages
+brew "starship" # Cross-shell prompt
 brew "bat" # better cat
 brew "git" # Git version control (latest version)
 brew "lazygit" # A better git UI
