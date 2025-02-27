@@ -37,3 +37,4 @@ brew "fzf" # Fuzzy file searcher, used in scripts and in vim
 brew "eza" # ls alternative
 brew "entr" # file watcher /command runner
 brew "zsh" #install latest version of zsh
+brew "luarocks" # Package manager for Lua modules (LazyVim uses it but is optional)
