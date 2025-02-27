@@ -1,3 +1,5 @@
+# vim: filetype=zsh
+
 export ZSH=$DOTFILES/zsh
 
 if [[ -d $DOTFILES/zsh/functions ]]; then
@@ -92,6 +94,7 @@ fi
 #########################################
 # Setup
 #########################################
+source $DOTFILES/zsh/aliases.zsh
 
 if [ -f $HOME/.fzf.zsh ]; then
   source $HOME/.fzf.zsh
@@ -124,4 +127,5 @@ fi
 # If a ~/.localrc zshrc exists, source it
 [[ -a ~/.localrc ]] && source ~/.localrc
 
+# Starship -- Cross-shell Prompt
 eval "$(starship init zsh)"
