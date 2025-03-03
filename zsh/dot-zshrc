@@ -60,7 +60,7 @@ prepend_path $HOME/.config/emacs/bin
 if [[ -d ~/code ]]; then
   export CODE_DIR=~/code
 elif [[ -d ~/Developer ]]; then
-  # export CODE_DIR=~/Developer
+  export CODE_DIR=~/Developer
 fi
 
 # display how long all tasks over 10 second take
