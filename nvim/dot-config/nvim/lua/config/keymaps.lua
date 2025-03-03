@@ -4,3 +4,7 @@
 --
 -- NOTE: Heavily inspired by https://www.youtube.com/watch?v=V070Zmvx9AM
 --
+
+-- '/' key to toggle commends in Normal mode and Visual mode
+vim.keymap.set("n", "/", "gcc", { remap = true, desc = "Toggle comment for line." })
+vim.keymap.set("v", "/", "gc", { remap = true, desc = "Toggle comment for selection." })
