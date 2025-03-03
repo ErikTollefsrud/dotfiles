@@ -115,6 +115,7 @@ zfetch zsh-users/zsh-autosuggestions
 zfetch grigorii-zander/zsh-npm-scripts-autocomplete
 zfetch Aloxaf/fzf-tab
 zfetch squarefrog/xcode
+zfetch jeffreytse/zsh-vi-mode
 
 # fnm is a fast and simple Node.js version manager
 if [[ -x "$(command -v fnm)" ]]; then
@@ -125,6 +126,13 @@ fi
 # Setup
 #########################################
 source $DOTFILES/zsh/aliases.zsh
+
+# jeffreytse/zsh-vi-mode Settings
+# Note: This plugin is to enable better vi mode support in zsh
+# and to fix issue where cursor when switching from Normal to Insert mode
+ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
+ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
+ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
 
 # setup fzf
 source <(fzf --zsh)
