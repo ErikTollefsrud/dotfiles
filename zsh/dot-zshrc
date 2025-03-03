@@ -6,6 +6,38 @@ if [[ -d $DOTFILES/zsh/functions ]]; then
   for func in $DOTFILES/zsh/functions/*(:t); autoload -U $func
 fi
 
+# Start in tmux
+if [[ ! -n $TMUX ]]; then
+  # get the session IDs
+  session_ids="$(tmux list-sessions)"
+
+  # Create new session if no sessions exist
+  if [[ -z "$session_ids" ]]; then
+    tmux new-session
+  fi
+
+  # Select from the following choices
+  #   - Attach existing session
+  #   - Create new session
+  #   - Start without tmux
+  create_new_session="Create new session"
+  start_without_tmux="Start without tmux"
+  choices="$session_ids\n${create_new_session}:\n${start_without_tmux}:"
+  choice="$(echo $choices | fzf | cut -d: -f1)"
+
+  if expr "$choice" : "[0-9]*$" >&/dev/null; then
+    # Attach existing session
+    tmux attach-session -t "$choice"
+  elif [[ "$choice" = "${create_new_session}" ]]; then
+    # Create new session
+    tmux new-session
+  elif [[ "$choice" = "${start_without_tmux}" ]]; then
+    # Start without tmux
+    echo "Starting without tmux"
+    :
+  fi
+fi
+
 ##############################
 # Configuration
 ##############################
@@ -28,7 +60,7 @@ prepend_path $HOME/.config/emacs/bin
 if [[ -d ~/code ]]; then
   export CODE_DIR=~/code
 elif [[ -d ~/Developer ]]; then
-  export CODE_DIR=~/Developer
+  # export CODE_DIR=~/Developer
 fi
 
 # display how long all tasks over 10 second take
@@ -89,13 +121,13 @@ if [[ -x "$(command -v fnm)" ]]; then
   eval "$(fnm env --use-on-cd)"
 fi
 
-[[ -e ~/.terminfo ]] && export TERMINFO_DIRS=~/.terminfo:/usr/share/terminfo
-
 #########################################
 # Setup
 #########################################
 source $DOTFILES/zsh/aliases.zsh
 
+# setup fzf
+source <(fzf --zsh)
 if [ -f $HOME/.fzf.zsh ]; then
   source $HOME/.fzf.zsh
   export FZF_DEFAULT_COMMAND='fd --type f'
@@ -121,11 +153,6 @@ if ls --color > /dev/null 2>&1; then # GNU `ls`
 else # macOS `ls`
     colorflag="-G"
 fi
-
-# If a ~/.zshrc.local exists, source it
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-# If a ~/.localrc zshrc exists, source it
-[[ -a ~/.localrc ]] && source ~/.localrc
 
 # Starship -- Cross-shell Prompt
 eval "$(starship init zsh)"
