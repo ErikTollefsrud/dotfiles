@@ -1,0 +1,9 @@
+# ghostty +show-config --default --docs | nvim
+
+# ghostty +list-fonts
+font-size = 13
+
+# monospace
+font-family = "JetBrains Mono NL"
+
+window-title-font-family = "JetBrains Mono NL"
