@@ -4,6 +4,6 @@
 font-size = 13
 
 # monospace
-font-family = "JetBrains Mono NL"
+font-family = "Source Code Pro"
 
-window-title-font-family = "JetBrains Mono NL"
+window-title-font-family = "Source Code Pro"
