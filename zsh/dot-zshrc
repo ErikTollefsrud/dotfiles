@@ -70,7 +70,7 @@ export KEYTIMEOUT=1             # 10ms delay for key sequences
 setopt NO_BG_NICE               # turns off setting background jobs at lower priority ('higher nice value' in UNIX-speak)
 setopt NO_HUP                   # don't kill background jobs when the shell exits
 setopt NO_LIST_BEEP             # beeping is only turned off for ambiguous completions
-setopt LOCAL_OPTIONS            
+setopt LOCAL_OPTIONS
 setopt LOCAL_TRAPS
 setopt PROMPT_SUBST             # parameter expansion, command substitution and arithmetic expansion are performed in prompts.
 
@@ -160,6 +160,32 @@ if ls --color > /dev/null 2>&1; then # GNU `ls`
 else # macOS `ls`
     colorflag="-G"
 fi
+
+# 1Password CLI auto-completion
+if op -v 2>&1 >/dev/null; then
+  eval "$(op completion zsh)"; compdef _op op
+fi
+
+# Activate VirtualEnv when cd into directory if available
+# Note: Requires virtualenv to be installed
+function cd() {
+  builtin cd "$@"
+
+  if [[ -z "$VIRTUAL_ENV" ]]; then
+    ## If env folder is found then activate the virtualenv
+    if [[ -d ./env ]]; then
+      source ./env/bin/activate
+    fi
+  else
+    ## Check the current folder belong to earlier VIRTUAL_ENV folder
+    # if yes then do nothing
+    # else deactivate
+    parentdir="$(dirname $VIRTUAL_ENV)"
+    if [[ "$PWD"/ != "$parentdir"/* ]]; then
+      deactivate
+    fi
+  fi
+}
 
 # Starship -- Cross-shell Prompt
 eval "$(starship init zsh)"
