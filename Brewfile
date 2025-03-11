@@ -12,7 +12,6 @@ if OS.mac?
 
 elsif OS.linux?
   brew "xclip" # access to clipboard (similar to pbcopy/pbpaste)
-  cask "ghostty"
 end
 
 # Fonts
@@ -38,3 +37,6 @@ brew "eza" # ls alternative
 brew "entr" # file watcher /command runner
 brew "zsh" #install latest version of zsh
 brew "luarocks" # Package manager for Lua modules (LazyVim uses it but is optional)
+brew "virtualenv" # Python virtual environment
+brew "node" # Node.js
+
