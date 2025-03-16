@@ -7,7 +7,7 @@ if [[ -d $DOTFILES/zsh/functions ]]; then
 fi
 
 # Start in tmux
-if [[ ! -n $TMUX ]]; then
+if [[ ! -n $TMUX && $TERM_PROGRAM != "vscode" ]]; then
   # get the session IDs
   session_ids="$(tmux list-sessions)"
 
