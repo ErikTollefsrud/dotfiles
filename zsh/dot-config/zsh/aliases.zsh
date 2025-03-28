@@ -38,3 +38,6 @@ fi
 alias la="ls -AF ${colorflag}"
 alias lld="ls -l | grep ^d"
 alias rmf="rm -rf"
+
+# Launch with my preferred pipes.sh settings
+alias pipes="pipes.sh -p 10 -t 6 -r 0"

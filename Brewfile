@@ -39,4 +39,4 @@ brew "zsh" #install latest version of zsh
 brew "luarocks" # Package manager for Lua modules (LazyVim uses it but is optional)
 brew "virtualenv" # Python virtual environment
 brew "node" # Node.js
-
+brew "pipes.sh" # A sort of cli screensaver
