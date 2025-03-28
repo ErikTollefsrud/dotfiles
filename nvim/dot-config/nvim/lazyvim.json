@@ -1,7 +1,9 @@
 {
   "extras": [
     "lazyvim.plugins.extras.ai.copilot",
-    "lazyvim.plugins.extras.coding.yanky"
+    "lazyvim.plugins.extras.coding.yanky",
+    "lazyvim.plugins.extras.util.dot",
+    "lazyvim.plugins.extras.vscode"
   ],
   "install_version": 8,
   "news": {

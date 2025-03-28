@@ -24,6 +24,7 @@
   "mini.hipatterns": { "branch": "main", "commit": "fbf1e2195fdd65cf1bc970316c28098257728868" },
   "mini.icons": { "branch": "main", "commit": "ec61af6e606fc89ee3b1d8f2f20166a3ca917a36" },
   "mini.pairs": { "branch": "main", "commit": "b90e36aa5ca5e0d825e77ad67aac22214a4d9096" },
+  "mini.starter": { "branch": "main", "commit": "cf770619b85968bc0f45cace82f5c80b69ca0e96" },
   "neotest": { "branch": "master", "commit": "dddbe8fe358b05b2b7e54fe4faab50563171a76d" },
   "neotest-jest": { "branch": "main", "commit": "514fd4eae7da15fd409133086bb8e029b65ac43f" },
   "neotest-plenary": { "branch": "master", "commit": "3523adcf9ffaad1911960c5813b0136c1b63a2ec" },
