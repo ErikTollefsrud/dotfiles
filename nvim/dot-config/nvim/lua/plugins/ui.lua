@@ -193,4 +193,11 @@ return {
       end
     end,
   },
+  -- Journal in neovim
+  {
+    "jakobkhansen/journal.nvim",
+    config = function()
+      require("journal").setup()
+    end,
+  },
 }

@@ -1,7 +1,7 @@
 # ghostty +show-config --default --docs | nvim
 
 # ghostty +list-fonts
-font-size = 13
+font-size = 14
 
 # monospace
 font-family = "Source Code Pro"
