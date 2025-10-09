@@ -1,0 +1,203 @@
+# vim: filetype=zsh
+
+echo "Wait a second..."
+export ZSH=$DOTFILES/zsh
+
+if [[ -d $DOTFILES/zsh/functions ]]; then
+  for func in $DOTFILES/zsh/functions/*(:t)
+  do
+    autoload -U $func
+  done
+fi
+
+# Start in tmux
+# get the session IDs
+session_ids="$(tmux list-sessions)"
+
+# Create new session if no sessions exist
+if [[ -z "$session_ids" ]]; then
+tmux new-session
+fi
+
+# Select from the following choices
+#   - Attach existing session
+#   - Create new session
+#   - Start without tmux
+create_new_session="Create new session"
+start_without_tmux="Start without tmux"
+choices="$session_ids\n${create_new_session}:\n${start_without_tmux}:"
+choice="$(echo $choices | fzf | cut -d: -f1)"
+
+# If the choice is a number (session ID), attach to that session.
+# If the choice matches "Create new session", start a new tmux session.
+# If the choice matches "Start without tmux", continue without tmux.
+# Edge cases: If the user cancels or selects an invalid option, nothing happens.
+if expr "$choice" : "[0-9]*$" >&/dev/null; then
+# Attach existing session
+tmux attach-session -t "$choice"
+elif [[ "$choice" = "${create_new_session}" ]]; then
+# Create new session
+tmux new-session
+elif [[ "$choice" = "${start_without_tmux}" ]]; then
+# Start without tmux
+echo "Starting without tmux"
+:
+fi
+
+##############################
+# Configuration
+##############################
+
+# A fairly complete list of zsh options (setopt / unsetopt) can be found here https://www.csse.uwa.edu.au/programming/linux/zsh-doc/zsh_17.html
+
+# initialize autocomplete
+autoload -U compinit add-zsh-hook
+compinit
+
+# PATH configuration
+prepend_path /usr/local/opt/grep/libexec/gnubin
+prepend_path /usr/local/sbin
+prepend_path $DOTFILES/bin
+prepend_path $HOME/bin
+prepend_path $HOME/.config/emacs/bin
+
+# define the code directory
+# This is where my code exists and where I want the `c` autocomplete to work from exclusively
+if [[ -d ~/code ]]; then
+  export CODE_DIR=~/code
+elif [[ -d ~/Developer ]]; then
+  export CODE_DIR=~/Developer
+fi
+
+# display how long all tasks over 10 second take
+export REPORTTIME=10
+export KEYTIMEOUT=1             # 10ms delay for key sequences
+
+setopt NO_BG_NICE               # turns off setting background jobs at lower priority ('higher nice value' in UNIX-speak)
+setopt NO_HUP                   # don't kill background jobs when the shell exits
+setopt NO_LIST_BEEP             # beeping is only turned off for ambiguous completions
+setopt LOCAL_OPTIONS
+setopt LOCAL_TRAPS
+setopt PROMPT_SUBST             # parameter expansion, command substitution and arithmetic expansion are performed in prompts.
+
+# history
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY       # write the history file in the ":start:elapsed;command" format.
+setopt HIST_REDUCE_BLANKS     # remove superfluous blanks before recording entry.
+setopt SHARE_HISTORY          # share history between all sessions.
+setopt HIST_IGNORE_ALL_DUPS   # delete old recorded entry if new entry is a duplicate.
+
+setopt COMPLETE_ALIASES       # Prevents aliases on the command line from being internally substituted before completion is attempted. The effect is to make the alias a distinct command for completion purposes.
+
+# matches case insensitive for lowercase
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+# pasting with tabs doesn't perform completion
+zstyle ':completion:*' insert-tab pending
+
+# default to file completion
+zstyle ':completion:*' completer _expand _complete _files _correct _approximate
+
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:description' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*' group-name ''
+
+#########################################
+# Plugin setup
+#########################################
+
+export ZPLUGDIR="$CACHEDIR/zsh/plugins"
+[[ -d "$ZPLUGDIR" ]] || mkdir -p "$ZPLUGDIR"
+# array containing plugin information (managed by zfetch)
+typeset -A plugins
+
+zfetch mafredri/zsh-async async.plugin.zsh
+zfetch zsh-users/zsh-syntax-highlighting
+zfetch zsh-users/zsh-autosuggestions
+zfetch grigorii-zander/zsh-npm-scripts-autocomplete
+zfetch Aloxaf/fzf-tab
+zfetch jeffreytse/zsh-vi-mode # https://github.com/jeffreytse/zsh-vi-mode
+
+# fnm is a fast and simple Node.js version manager
+if [[ -x "$(command -v fnm)" ]]; then
+  eval "$(fnm env --use-on-cd)"
+fi
+
+#########################################
+# Setup
+#########################################
+source $DOTFILES/zsh/aliases.zsh
+
+# jeffreytse/zsh-vi-mode Settings
+# Note: This plugin is to enable better vi mode support in zsh
+# and to fix issue where cursor when switching from Normal to Insert mode
+ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
+ZVM_NORMAL_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BLOCK
+ZVM_OPPEND_MODE_CURSOR=$ZVM_CURSOR_BLINKING_UNDERLINE
+
+# setup fzf
+if [[ ! -n $TMUX && $TERM_PROGRAM != "vscode" ]]; then
+  source <(fzf --zsh)
+  if [ -f $HOME/.fzf.zsh ]; then
+    source $HOME/.fzf.zsh
+    export FZF_DEFAULT_COMMAND='fd --type f'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_DEFAULT_OPTS="--color bg:-1,bg+:-1,fg:-1,fg+:#feffff,hl:#993f84,hl+:#d256b5,info:#676767,prompt:#676767,pointer:#676767"
+  fi
+fi
+
+# add color to man pages
+export MANROFFOPT='-c'
+export LESS_TERMCAP_mb=$(tput bold; tput setaf 2)
+export LESS_TERMCAP_md=$(tput bold; tput setaf 6)
+export LESS_TERMCAP_me=$(tput sgr0)
+export LESS_TERMCAP_so=$(tput bold; tput setaf 3; tput setab 4)
+export LESS_TERMCAP_se=$(tput rmso; tput sgr0)
+export LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 7)
+export LESS_TERMCAP_ue=$(tput rmul; tput sgr0)
+export LESS_TERMCAP_mr=$(tput rev)
+export LESS_TERMCAP_mh=$(tput dim)
+
+# Detect which `ls` flavor is in use
+if ls --color > /dev/null 2>&1; then # GNU `ls`
+    colorflag="--color"
+else # macOS `ls`
+    colorflag="-G"
+fi
+
+#############################
+# Minimal Prompt
+#############################
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# 1Password CLI auto-completion
+# if op -v 2>&1 >/dev/null; then
+#   # eval "$(op completion zsh)"; compdef _op op
+# fi
+
+# Activate VirtualEnv when cd into directory if available
+# Note: Requires virtualenv to be installed
+function cd() {
+  builtin cd "$@"
+
+  if [[ -z "$VIRTUAL_ENV" ]]; then
+    ## If env folder is found then activate the virtualenv
+    if [[ -d ./env ]]; then
+      source ./env/bin/activate
+    fi
+  else
+    ## Check the current folder belong to earlier VIRTUAL_ENV folder
+    # if yes then do nothing
+    # else deactivate
+    parentdir="$(dirname $VIRTUAL_ENV)"
+    if [[ "$PWD"/ != "$parentdir"/* ]]; then
+      deactivate
+    fi
+  fi
+}

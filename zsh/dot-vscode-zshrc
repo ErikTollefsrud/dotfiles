@@ -1,0 +1,97 @@
+#!/usr/bin/env zsh
+echo "you're in the right place..."
+export ZSH=$DOTFILES/zsh
+
+# Load custom functions
+if [[ -d $DOTFILES/zsh/functions ]]; then
+  for func in $DOTFILES/zsh/functions/*(:t); do
+    autoload -U $func
+  done
+fi
+
+##############################
+# Essential Configuration
+##############################
+
+# History configuration
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt EXTENDED_HISTORY
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+
+# Performance options
+setopt NO_BG_NICE
+setopt NO_HUP
+setopt NO_LIST_BEEP
+setopt LOCAL_OPTIONS
+setopt LOCAL_TRAPS
+setopt PROMPT_SUBST
+
+# Completion configuration
+autoload -U compinit add-zsh-hook
+compinit
+
+# Completion styles
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' insert-tab pending
+zstyle ':completion:*' completer _expand _complete _files _correct _approximate
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:description' format '%B%d%b'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
+zstyle ':completion:*' group-name ''
+
+##############################
+# PATH Configuration
+##############################
+prepend_path /usr/local/opt/grep/libexec/gnubin
+prepend_path /usr/local/sbin
+prepend_path $DOTFILES/bin
+prepend_path $HOME/bin
+# prepend_path $HOME/.config/emacs/bin
+
+# Set CODE_DIR
+if [[ -d ~/code ]]; then
+  export CODE_DIR=~/code
+elif [[ -d ~/Developer ]]; then
+  export CODE_DIR=~/Developer
+fi
+
+##############################
+# Essential Plugins
+##############################
+export ZPLUGDIR="$CACHEDIR/zsh/plugins"
+[[ -d "$ZPLUGDIR" ]] || mkdir -p "$ZPLUGDIR"
+typeset -A plugins
+# Load only the most important plugins for VS Code
+zfetch zsh-users/zsh-syntax-highlighting
+zfetch zsh-users/zsh-autosuggestions
+zfetch Aloxaf/fzf-tab
+##############################
+# Node.js Setup (fnm)
+##############################
+# if [[ -x "$(command -v fnm)" ]]; then
+# eval "$(fnm env --use-on-cd)"
+# fi
+
+##############################
+# Core Aliases and Settings
+##############################
+source $DOTFILES/zsh/aliases.zsh
+
+# # Detect which `ls` flavor is in use
+if ls --color >/dev/null 2>&1; then
+  colorflag="--color"
+else
+  colorflag="-G"
+fi
+
+#############################
+# Minimal Prompt
+#############################
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi

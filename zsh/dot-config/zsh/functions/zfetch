@@ -79,7 +79,130 @@ else
   fi
   plugin="$dest/$plugin_name"
   if [ -f "$plugin" ]; then
-      source "$plugin"
+      # Allow repository-managed wrapper scripts to control when a plugin's
+      # initialization code is sourced. Wrappers live in either the repo
+      # (DOTFILES/zsh/plugin-wrappers) or in a cache folder ($ZPLUGDIR/.wrappers).
+      # If a wrapper exists for this plugin, prefer sourcing it so the wrapper
+      # can safely defer interactive-only calls (zle/compdef) until the
+      # environment is ready.
+      # Build a small list of candidate wrapper filenames to match common
+      # naming patterns (the plugin file might be either *.plugin.zsh or
+      # *.zsh). Example candidates for repo `org/repo` and plugin `foo.plugin.zsh`:
+      #  - org_repo.foo.plugin.zsh
+      #  - org_repo.foo.zsh
+      #  - org_repo.foo
+      plugin_basename="$plugin_name"
+      plugin_no_plugin_ext="${plugin_basename/.plugin.zsh/}"
+      wrapper_base="${name//\//_}"
+      candidates=("${wrapper_base}.${plugin_basename}" "${wrapper_base}.${plugin_no_plugin_ext}" "${wrapper_base}.${plugin_no_plugin_ext%.zsh}")
+      for cand in "${candidates[@]}"; do
+          repo_path1="$DOTFILES/zsh/plugin-wrappers/$cand"
+          repo_path2="$ZDOTDIR/dot-config/zsh/plugin-wrappers/$cand"
+          cache_path="$ZPLUGDIR/.wrappers/$cand"
+          # Prefer DOTFILES-managed wrappers, but fall back to a repository
+          # layout when DOTFILES is not set (useful when testing with ZDOTDIR).
+          if [[ -n "${DOTFILES:-}" && -f "$repo_path1" ]]; then
+              echo "zfetch: sourcing wrapper $repo_path1 (for plugin $plugin)" >&2
+              source "$repo_path1"
+              cd $cwd
+              return 0
+          elif [[ -n "${ZDOTDIR:-}" && -f "$repo_path2" ]]; then
+              echo "zfetch: sourcing wrapper $repo_path2 (for plugin $plugin)" >&2
+              source "$repo_path2"
+              cd $cwd
+              return 0
+          elif [ -f "$cache_path" ]; then
+              echo "zfetch: sourcing cached wrapper $cache_path (for plugin $plugin)" >&2
+              source "$cache_path"
+              cd $cwd
+              return 0
+          fi
+      done
+      # Only source plugin initialization code when running in a real
+      # interactive tty. Some plugins call `zle`, `compdef`, or other
+      # interactive-only features at source time which will error in
+      # non-interactive or non-tty profiling runs. Additionally, many
+      # plugins expect `compinit` (and `zle`) to be available; only source
+      # them after `compinit` has run unless explicitly forced via
+      # ZFETCH_FORCE.
+    if [[ -o interactive && -t 0 && -n "$PS1" ]]; then
+          # If the plugin appears to use interactive-only features like
+          # `zle` or `compdef`, and compinit hasn't run yet, defer sourcing
+          # the plugin until later unless ZFETCH_FORCE is set.
+              if [[ -n "${ZFETCH_FORCE:-}" || -n "${COMPINIT_DONE:-}" ]]; then
+                  source "$plugin"
+          else
+              if grep -qE '\b(compdef|\bzle\b|zle -N|zle -C)' "$plugin" >/dev/null 2>&1; then
+                  # register deferred plugin if not already present
+                  typeset -a ZFETCH_DEFERRED
+                  if [[ -z "${ZFETCH_DEFERRED[(r)$plugin]-}" ]]; then
+                      ZFETCH_DEFERRED+=("$plugin")
+                  fi
+                  return 0
+              else
+                  source "$plugin"
+              fi
+          fi
+      else
+          # In non-interactive/non-tty contexts, skip sourcing the plugin.
+          :
+      fi
   fi
   cd $cwd
 fi
+
+# Load any deferred plugins that were registered because they require a
+# fully-initialized interactive environment (compinit/zle). This should be
+# invoked after COMPINIT_DONE is set.
+zfetch_load_deferred() {
+    if [[ -n "${ZFETCH_DEFERRED:-}" ]]; then
+        for p in "${ZFETCH_DEFERRED[@]}"; do
+            # When loading deferred plugins, try to find the original repo
+            # "name" key that maps to this plugin path via the `plugins`
+            # associative array. That gives us the org/repo value to build
+            # wrapper candidate names consistently.
+            sourced=0
+            for key in ${(@k)plugins}; do
+                destdir=${plugins[$key]}
+                if [[ "$p" == "$destdir"/* ]]; then
+                    # found the plugin's originating name
+                    plugin_file="${p##*/}"
+                    plugin_no_plugin_ext="${plugin_file/.plugin.zsh/}"
+                    wrapper_base="${key//\//_}"
+                    candidates=("${wrapper_base}.${plugin_file}" "${wrapper_base}.${plugin_no_plugin_ext}" "${wrapper_base}.${plugin_no_plugin_ext%.zsh}")
+                    for cand in "${candidates[@]}"; do
+                        repo_path1="$DOTFILES/zsh/plugin-wrappers/$cand"
+                        repo_path2="$ZDOTDIR/dot-config/zsh/plugin-wrappers/$cand"
+                        cache_path="$ZPLUGDIR/.wrappers/$cand"
+                        if [[ -n "${DOTFILES:-}" && -f "$repo_path1" ]]; then
+                            echo "zfetch: (deferred) sourcing wrapper $repo_path1 (for plugin $p)" >&2
+                            source "$repo_path1"
+                            sourced=1
+                            break
+                        elif [[ -n "${ZDOTDIR:-}" && -f "$repo_path2" ]]; then
+                            echo "zfetch: (deferred) sourcing wrapper $repo_path2 (for plugin $p)" >&2
+                            source "$repo_path2"
+                            sourced=1
+                            break
+                        elif [ -f "$cache_path" ]; then
+                            echo "zfetch: (deferred) sourcing cached wrapper $cache_path (for plugin $p)" >&2
+                            source "$cache_path"
+                            sourced=1
+                            break
+                        fi
+                    done
+                    if (( sourced )); then
+                        break
+                    fi
+                fi
+            done
+            if (( sourced )); then
+                continue
+            fi
+            if [ -f "$p" ]; then
+                source "$p"
+            fi
+        done
+        unset ZFETCH_DEFERRED
+    fi
+}
