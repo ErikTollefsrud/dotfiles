@@ -70,6 +70,7 @@ typeset -A plugins
 zfetch zsh-users/zsh-syntax-highlighting
 zfetch zsh-users/zsh-autosuggestions
 zfetch Aloxaf/fzf-tab
+zfetch jeffreytse/zsh-vi-mode # https://github.com/jeffreytse/zsh-vi-mode
 ##############################
 # Node.js Setup (fnm)
 ##############################
