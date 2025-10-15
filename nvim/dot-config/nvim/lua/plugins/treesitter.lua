@@ -4,6 +4,9 @@ return {
     tag = "v0.9.3",
     opts = {
       ensure_installed = {
+        "c",
+        "vimdoc",
+        "markdown",
         "javascript",
         "typescript",
         "css",
