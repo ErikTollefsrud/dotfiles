@@ -1,10 +1,9 @@
 # vim: filetype=zsh
 
-echo "DEBUG: \$TERM_PROGRAM is currently set to: '$TERM_PROGRAM'"
 if [[ "$TERM_PROGRAM" == "vscode" ]]; then
     source ~/dotfiles/zsh/dot-vscode-zshrc
 fi
 
-if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+if [[ "$TERM_PROGRAM" == "ghostty" || "$TERM_PROGRAM" == "tmux" ]]; then
     source ~/dotfiles/zsh/dot-default-zshrc
 fi

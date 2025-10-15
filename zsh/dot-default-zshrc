@@ -1,6 +1,5 @@
 # vim: filetype=zsh
 
-echo "Wait a second..."
 export ZSH=$DOTFILES/zsh
 
 if [[ -d $DOTFILES/zsh/functions ]]; then
@@ -10,39 +9,39 @@ if [[ -d $DOTFILES/zsh/functions ]]; then
   done
 fi
 
-# Start in tmux
-# get the session IDs
-session_ids="$(tmux list-sessions)"
-
-# Create new session if no sessions exist
-if [[ -z "$session_ids" ]]; then
-tmux new-session
-fi
-
-# Select from the following choices
-#   - Attach existing session
-#   - Create new session
-#   - Start without tmux
-create_new_session="Create new session"
-start_without_tmux="Start without tmux"
-choices="$session_ids\n${create_new_session}:\n${start_without_tmux}:"
-choice="$(echo $choices | fzf | cut -d: -f1)"
-
-# If the choice is a number (session ID), attach to that session.
-# If the choice matches "Create new session", start a new tmux session.
-# If the choice matches "Start without tmux", continue without tmux.
-# Edge cases: If the user cancels or selects an invalid option, nothing happens.
-if expr "$choice" : "[0-9]*$" >&/dev/null; then
-# Attach existing session
-tmux attach-session -t "$choice"
-elif [[ "$choice" = "${create_new_session}" ]]; then
-# Create new session
-tmux new-session
-elif [[ "$choice" = "${start_without_tmux}" ]]; then
-# Start without tmux
-echo "Starting without tmux"
-:
-fi
+# # Start in tmux
+# # get the session IDs
+# session_ids="$(tmux list-sessions)"
+#
+# # Create new session if no sessions exist
+# if [[ -z "$session_ids" ]]; then
+# tmux new-session
+# fi
+#
+# # Select from the following choices
+# #   - Attach existing session
+# #   - Create new session
+# #   - Start without tmux
+# create_new_session="Create new session"
+# start_without_tmux="Start without tmux"
+# choices="$session_ids\n${create_new_session}:\n${start_without_tmux}:"
+# choice="$(echo $choices | fzf | cut -d: -f1)"
+#
+# # If the choice is a number (session ID), attach to that session.
+# # If the choice matches "Create new session", start a new tmux session.
+# # If the choice matches "Start without tmux", continue without tmux.
+# # Edge cases: If the user cancels or selects an invalid option, nothing happens.
+# if expr "$choice" : "[0-9]*$" >&/dev/null; then
+# # Attach existing session
+# tmux attach-session -t "$choice"
+# elif [[ "$choice" = "${create_new_session}" ]]; then
+# # Create new session
+# tmux new-session
+# elif [[ "$choice" = "${start_without_tmux}" ]]; then
+# # Start without tmux
+# echo "Starting without tmux"
+# :
+# fi
 
 ##############################
 # Configuration

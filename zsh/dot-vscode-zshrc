@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-echo "you're in the right place..."
+
 export ZSH=$DOTFILES/zsh
 
 # Load custom functions
