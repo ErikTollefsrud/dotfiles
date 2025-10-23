@@ -1,7 +1,7 @@
 return {
   "epwalsh/obsidian.nvim",
   version = "*",
-  lazy = true,
+  lazy = false,
   ft = "markdown",
   dependencies = {
     "nvim-lua/plenary.nvim",
@@ -12,10 +12,10 @@ return {
         name = "Work",
         path = "~/Documents/ObsidianVault",
       },
-      {
-        name = "Coding Notes",
-        path = "~/Documents/Coding Notes",
-      },
+      -- {
+      --   name = "Coding Notes",
+      --   path = "~/Documents/Coding Notes",
+      -- },
     },
   },
 }
