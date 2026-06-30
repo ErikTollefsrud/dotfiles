@@ -2,8 +2,6 @@
 
 if [[ "$TERM_PROGRAM" == "vscode" ]]; then
     source ~/dotfiles/zsh/dot-vscode-zshrc
-fi
-
-if [[ "$TERM_PROGRAM" == "ghostty" || "$TERM_PROGRAM" == "tmux" ]]; then
+else
     source ~/dotfiles/zsh/dot-default-zshrc
 fi
