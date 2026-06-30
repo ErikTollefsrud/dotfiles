@@ -1,7 +1,12 @@
 return {
   {
     "rest-nvim/rest.nvim",
-    dependencies = { { "nvim-lua/plenary.nvim" } },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-neotest/nvim-nio",
+    },
+    -- Force standard source build instead of a luarocks build
+    build = ":LazyJuiceBuild",
     config = function()
       require("vim.g.rest_nvim").setup({
         -- Open request results in a horizontal split
