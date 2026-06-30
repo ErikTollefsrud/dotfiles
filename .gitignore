@@ -3,6 +3,10 @@
 vim/.vim/plugged/*
 vim/.vim/.netrwhist
 
+# Zsh Files & Folders #
+#######################
+.zsh_history
+
 # OS Generated Files #
 ######################
 .DS_Store
